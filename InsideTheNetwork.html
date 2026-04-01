@@ -1,0 +1,2296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>InsideTheNetwork – Tech Community Forum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root {
+  --bg-primary: #0a0c10;
+  --bg-secondary: #0f1219;
+  --bg-card: #131720;
+  --bg-hover: #181e2a;
+  --bg-elevated: #1c2333;
+  --accent-cyan: #00d4ff;
+  --accent-green: #00ff88;
+  --accent-purple: #a855f7;
+  --accent-amber: #f59e0b;
+  --accent-red: #ef4444;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #4b5563;
+  --border: #1e2a3a;
+  --border-bright: #2d3f55;
+  --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.15);
+  --glow-green: 0 0 20px rgba(0, 255, 136, 0.12);
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+
+/* ===== LAYOUT ===== */
+.app-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr 280px;
+  grid-template-rows: 60px 1fr;
+  min-height: 100vh;
+}
+
+.topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  background: rgba(10, 12, 16, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.sidebar-left {
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  overflow-y: auto;
+  height: calc(100vh - 60px);
+  position: sticky;
+  top: 60px;
+}
+
+.main-content {
+  padding: 24px;
+  overflow-y: auto;
+  height: calc(100vh - 60px);
+}
+
+.sidebar-right {
+  border-left: 1px solid var(--border);
+  padding: 20px;
+  overflow-y: auto;
+  height: calc(100vh - 60px);
+  position: sticky;
+  top: 60px;
+}
+
+/* ===== TOPBAR ===== */
+.logo {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-green) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.logo span {
+  font-weight: 400;
+  opacity: 0.6;
+}
+
+.search-bar {
+  flex: 1;
+  max-width: 480px;
+  position: relative;
+}
+
+.search-bar input {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px 8px 38px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-bar input:focus { border-color: var(--accent-cyan); }
+.search-bar input::placeholder { color: var(--text-muted); }
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.btn {
+  padding: 7px 16px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  outline: none;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--border-bright); }
+
+.btn-primary {
+  background: var(--accent-cyan);
+  color: #000;
+  font-weight: 600;
+}
+.btn-primary:hover { background: #00b8db; box-shadow: var(--glow-cyan); }
+
+.btn-danger {
+  background: transparent;
+  color: var(--accent-red);
+  border: 1px solid rgba(239,68,68,0.3);
+}
+.btn-danger:hover { background: rgba(239,68,68,0.1); }
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #000;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.notif-btn {
+  position: relative;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+.notif-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.notif-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--accent-red);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== SIDEBAR LEFT ===== */
+.nav-section-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 0 20px;
+  margin: 16px 0 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 20px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 13.5px;
+  transition: all 0.15s;
+  position: relative;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-item:hover { color: var(--text-primary); background: var(--bg-hover); }
+
+.nav-item.active {
+  color: var(--accent-cyan);
+  background: rgba(0, 212, 255, 0.06);
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent-cyan);
+  border-radius: 0 2px 2px 0;
+}
+
+.nav-icon { font-size: 15px; width: 18px; text-align: center; }
+
+.nav-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+.nav-item.active .nav-count { background: rgba(0,212,255,0.15); color: var(--accent-cyan); }
+
+.category-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ===== MAIN PANELS ===== */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ===== FEED / THREADS ===== */
+.feed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.feed-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.feed-title span {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+.filter-tab {
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  background: transparent;
+}
+
+.filter-tab.active {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.filter-tab:hover:not(.active) { color: var(--text-secondary); }
+
+.thread-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.thread-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: transparent;
+  transition: background 0.2s;
+}
+
+.thread-card:hover {
+  border-color: var(--border-bright);
+  background: var(--bg-hover);
+  transform: translateY(-1px);
+}
+
+.thread-card:hover::before { background: var(--accent-cyan); }
+.thread-card.pinned::before { background: var(--accent-amber); }
+.thread-card.hot::before { background: var(--accent-red); }
+
+.thread-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.thread-author-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.thread-author { font-size: 12.5px; font-weight: 500; color: var(--text-secondary); }
+.thread-author span { color: var(--text-primary); }
+.thread-time { font-size: 11px; color: var(--text-muted); margin-left: auto; font-family: var(--font-mono); }
+
+.thread-title {
+  font-family: var(--font-display);
+  font-size: 15.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.thread-preview {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.thread-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--font-mono);
+  border: 1px solid;
+}
+
+.tag-cyber { background: rgba(0,212,255,0.08); color: var(--accent-cyan); border-color: rgba(0,212,255,0.2); }
+.tag-prog { background: rgba(0,255,136,0.08); color: var(--accent-green); border-color: rgba(0,255,136,0.2); }
+.tag-net { background: rgba(168,85,247,0.08); color: var(--accent-purple); border-color: rgba(168,85,247,0.2); }
+.tag-hacking { background: rgba(245,158,11,0.08); color: var(--accent-amber); border-color: rgba(245,158,11,0.2); }
+.tag-os { background: rgba(239,68,68,0.08); color: var(--accent-red); border-color: rgba(239,68,68,0.2); }
+
+.thread-stat {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.vote-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.vote-btn:hover { border-color: var(--accent-green); color: var(--accent-green); background: rgba(0,255,136,0.06); }
+.vote-btn.voted { border-color: var(--accent-green); color: var(--accent-green); background: rgba(0,255,136,0.1); }
+.vote-btn.downvote:hover { border-color: var(--accent-red); color: var(--accent-red); background: rgba(239,68,68,0.06); }
+
+.hot-badge {
+  background: rgba(239,68,68,0.15);
+  color: var(--accent-red);
+  border: 1px solid rgba(239,68,68,0.3);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  margin-left: auto;
+}
+
+.pinned-badge {
+  background: rgba(245,158,11,0.12);
+  color: var(--accent-amber);
+  border: 1px solid rgba(245,158,11,0.25);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  margin-left: auto;
+}
+
+/* ===== THREAD DETAIL ===== */
+#thread-detail {
+  display: none;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 0;
+  margin-bottom: 20px;
+  background: transparent;
+  border: none;
+  transition: color 0.15s;
+}
+.back-btn:hover { color: var(--text-primary); }
+
+.thread-full {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 20px;
+}
+
+.thread-full-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 16px;
+  line-height: 1.35;
+}
+
+.thread-body {
+  font-size: 14.5px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.thread-body code {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent-cyan);
+}
+
+.thread-body pre {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  overflow-x: auto;
+  margin: 14px 0;
+}
+
+.thread-body pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  display: block;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+.thread-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.reply-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.reply-box-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+}
+
+.reply-textarea {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.7;
+  resize: vertical;
+  min-height: 120px;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 12px;
+}
+.reply-textarea:focus { border-color: var(--accent-cyan); }
+
+.comment-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  margin-bottom: 10px;
+}
+
+.comment-card.nested {
+  margin-left: 32px;
+  border-left: 2px solid var(--accent-purple);
+  background: var(--bg-secondary);
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.comment-body {
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--text-secondary);
+}
+
+.comment-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.comment-action {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.comment-action:hover { color: var(--accent-cyan); }
+
+/* ===== CATEGORIES VIEW ===== */
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.category-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.category-card::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  opacity: 0.04;
+  transition: opacity 0.2s;
+}
+
+.category-card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+.category-card:hover::after { opacity: 0.08; }
+
+.cat-cyber::after { background: var(--accent-cyan); }
+.cat-prog::after { background: var(--accent-green); }
+.cat-net::after { background: var(--accent-purple); }
+.cat-hacking::after { background: var(--accent-amber); }
+.cat-os::after { background: var(--accent-red); }
+.cat-tools::after { background: #60a5fa; }
+
+.category-icon {
+  font-size: 28px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.category-name {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.category-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.category-stats {
+  display: flex;
+  gap: 14px;
+}
+
+.cat-stat {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.cat-stat strong {
+  color: var(--text-secondary);
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ===== PROFILE VIEW ===== */
+.profile-header {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,255,136,0.1), rgba(168,85,247,0.12));
+}
+
+.profile-content {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  padding-top: 40px;
+}
+
+.profile-avatar-lg {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 700;
+  color: #000;
+  border: 3px solid var(--bg-card);
+  flex-shrink: 0;
+}
+
+.profile-info { flex: 1; }
+
+.profile-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.profile-handle {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  margin-right: 6px;
+}
+
+.role-admin { background: rgba(239,68,68,0.12); color: var(--accent-red); border: 1px solid rgba(239,68,68,0.25); }
+.role-mod { background: rgba(245,158,11,0.12); color: var(--accent-amber); border: 1px solid rgba(245,158,11,0.25); }
+.role-user { background: rgba(0,212,255,0.08); color: var(--accent-cyan); border: 1px solid rgba(0,212,255,0.2); }
+
+.profile-stats {
+  display: flex;
+  gap: 28px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.profile-stat { text-align: center; }
+.profile-stat-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+}
+.profile-stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.skill-tag {
+  padding: 4px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+/* ===== ADMIN PANEL ===== */
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+}
+
+.stat-card-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.stat-card-value {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
+}
+
+.stat-card-delta {
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.delta-up { color: var(--accent-green); }
+.delta-down { color: var(--accent-red); }
+
+.admin-section-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.admin-table th {
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-weight: 500;
+}
+
+.admin-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: middle;
+}
+
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table tr:hover td { background: var(--bg-hover); }
+
+.online-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  display: inline-block;
+  margin-right: 6px;
+  box-shadow: 0 0 6px rgba(0,255,136,0.5);
+}
+
+/* ===== NEW THREAD MODAL ===== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  width: 640px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-close {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.15s;
+}
+.modal-close:hover { color: var(--text-primary); border-color: var(--border-bright); }
+
+.form-group { margin-bottom: 16px; }
+
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 7px;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 11px 14px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent-cyan); }
+.form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
+.form-select { appearance: none; cursor: pointer; }
+.form-textarea { resize: vertical; min-height: 140px; line-height: 1.7; }
+
+.markdown-toolbar {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  padding: 6px 10px;
+}
+
+.md-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 3px 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.md-btn:hover { background: var(--bg-card); color: var(--text-primary); border-color: var(--border); }
+
+.form-textarea.with-toolbar { border-radius: 0 0 var(--radius-md) var(--radius-md); }
+
+/* ===== RIGHT SIDEBAR ===== */
+.sidebar-section { margin-bottom: 24px; }
+
+.sidebar-section-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.online-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+}
+
+.online-user-info { flex: 1; min-width: 0; }
+.online-user-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.online-user-role { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+
+.trending-item {
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.trending-item:last-child { border-bottom: none; }
+
+.trending-rank {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+}
+
+.trending-title {
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+.trending-title:hover { color: var(--text-primary); cursor: pointer; }
+
+.trending-stats {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-top: 4px;
+}
+
+/* ===== LIVE NOTIFICATION ===== */
+.live-notif {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-bright);
+  border-left: 3px solid var(--accent-cyan);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  max-width: 320px;
+  z-index: 999;
+  transform: translateX(120%);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.live-notif.show { transform: translateX(0); }
+.live-notif-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.live-notif-body { font-size: 12px; color: var(--text-muted); }
+.live-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-cyan); margin-right: 6px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ===== REPUTATION ===== */
+.karma-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 10px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--accent-amber);
+}
+
+/* ===== UTILITY ===== */
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.ml-auto { margin-left: auto; }
+.text-muted { color: var(--text-muted); font-size: 12px; }
+.text-cyan { color: var(--accent-cyan); }
+.text-green { color: var(--accent-green); }
+.text-purple { color: var(--accent-purple); }
+.text-amber { color: var(--accent-amber); }
+.text-red { color: var(--accent-red); }
+.mono { font-family: var(--font-mono); }
+
+/* ===== ANIMATE IN ===== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.thread-card { animation: fadeUp 0.35s ease both; }
+.thread-card:nth-child(1) { animation-delay: 0.0s; }
+.thread-card:nth-child(2) { animation-delay: 0.06s; }
+.thread-card:nth-child(3) { animation-delay: 0.12s; }
+.thread-card:nth-child(4) { animation-delay: 0.18s; }
+.thread-card:nth-child(5) { animation-delay: 0.24s; }
+.thread-card:nth-child(6) { animation-delay: 0.3s; }
+
+/* ===== AUTH SCREEN ===== */
+#auth-screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+#auth-screen.open { display: flex; }
+
+.auth-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius-xl);
+  padding: 36px 40px;
+  width: 420px;
+  max-width: 95vw;
+}
+
+.auth-logo {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
+}
+
+.auth-tagline { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+
+.oauth-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 11px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 10px;
+}
+.oauth-btn:hover { border-color: var(--border-bright); color: var(--text-primary); background: var(--bg-hover); }
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+  margin: 14px 0;
+}
+.or-divider::before, .or-divider::after { content:''; flex:1; height:1px; background: var(--border); }
+
+/* ===== SEARCH RESULTS ===== */
+.search-results {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.search-result-item {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover { background: var(--bg-hover); }
+.search-result-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.search-result-preview { font-size: 12px; color: var(--text-muted); }
+.search-highlight { color: var(--accent-cyan); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen" class="open">
+  <div class="auth-card">
+    <div class="auth-logo">InsideTheNetwork</div>
+    <div class="auth-tagline">The premium community for security &amp; engineering professionals</div>
+
+    <button class="oauth-btn" onclick="loginWith('github')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      Continue with GitHub
+    </button>
+    <button class="oauth-btn" onclick="loginWith('google')">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+
+    <div class="or-divider">or</div>
+
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" placeholder="admin@insidethenetwork.io" id="login-email" value="admin@insidethenetwork.io" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-input" placeholder="••••••••" id="login-pass" value="••••••••" />
+    </div>
+
+    <button class="btn btn-primary" style="width:100%;padding:12px;font-size:14px;margin-top:6px;" onclick="doLogin()">
+      Sign in to InsideTheNetwork
+    </button>
+
+    <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--text-muted);">
+      No account? <span style="color:var(--accent-cyan);cursor:pointer;" onclick="doLogin()">Register free</span> · Protected by JWT + rate limiting
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none;">
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="logo" onclick="navigate('feed')">Inside<span>The</span>Network</div>
+  <div class="search-bar">
+    <span class="search-icon">⌕</span>
+    <input type="text" placeholder="Search threads, tags, users..." id="search-input" oninput="handleSearch(this.value)" />
+  </div>
+  <div class="topbar-actions">
+    <button class="notif-btn" onclick="toggleNotifications()">
+      🔔
+      <span class="notif-badge" id="notif-count">3</span>
+    </button>
+    <button class="btn btn-ghost" onclick="navigate('admin')">⚙ Admin</button>
+    <button class="btn btn-primary" onclick="openNewThread()">+ New Thread</button>
+    <div class="avatar" onclick="navigate('profile')" title="ghost_0x41">G</div>
+  </div>
+</header>
+
+<div class="app-layout" style="grid-template-rows: unset; display: grid; grid-template-columns: 240px 1fr 280px;">
+
+<!-- SIDEBAR LEFT -->
+<aside class="sidebar-left">
+  <div class="nav-section-label">Navigate</div>
+  <button class="nav-item active" id="nav-feed" onclick="navigate('feed')">
+    <span class="nav-icon">⌘</span> Feed
+    <span class="nav-count">24</span>
+  </button>
+  <button class="nav-item" id="nav-categories" onclick="navigate('categories')">
+    <span class="nav-icon">#</span> Categories
+  </button>
+  <button class="nav-item" id="nav-profile" onclick="navigate('profile')">
+    <span class="nav-icon">◉</span> My Profile
+  </button>
+  <button class="nav-item" id="nav-bookmarks" onclick="navigate('bookmarks')">
+    <span class="nav-icon">◈</span> Bookmarks
+    <span class="nav-count">7</span>
+  </button>
+  <button class="nav-item" id="nav-admin" onclick="navigate('admin')">
+    <span class="nav-icon">◆</span> Admin Panel
+    <span class="nav-count" style="background:rgba(239,68,68,0.15);color:var(--accent-red);">!</span>
+  </button>
+
+  <div class="nav-section-label" style="margin-top:20px;">Categories</div>
+  <button class="nav-item" onclick="filterByCategory('cybersecurity')">
+    <span class="category-dot" style="background:var(--accent-cyan)"></span> Cybersecurity
+    <span class="nav-count">312</span>
+  </button>
+  <button class="nav-item" onclick="filterByCategory('programming')">
+    <span class="category-dot" style="background:var(--accent-green)"></span> Programming
+    <span class="nav-count">287</span>
+  </button>
+  <button class="nav-item" onclick="filterByCategory('networking')">
+    <span class="category-dot" style="background:var(--accent-purple)"></span> Networking
+    <span class="nav-count">195</span>
+  </button>
+  <button class="nav-item" onclick="filterByCategory('ethical-hacking')">
+    <span class="category-dot" style="background:var(--accent-amber)"></span> Ethical Hacking
+    <span class="nav-count">143</span>
+  </button>
+  <button class="nav-item" onclick="filterByCategory('os')">
+    <span class="category-dot" style="background:var(--accent-red)"></span> OS / Linux
+    <span class="nav-count">98</span>
+  </button>
+  <button class="nav-item" onclick="filterByCategory('tools')">
+    <span class="category-dot" style="background:#60a5fa"></span> Tools & Resources
+    <span class="nav-count">74</span>
+  </button>
+
+  <div class="nav-section-label" style="margin-top:20px;">Personal</div>
+  <button class="nav-item" onclick="navigate('profile')">
+    <span class="nav-icon">★</span> Reputation
+    <span class="nav-count" style="background:rgba(245,158,11,0.12);color:var(--accent-amber);">2.4k</span>
+  </button>
+  <button class="nav-item">
+    <span class="nav-icon">✉</span> Notifications
+    <span class="nav-count">3</span>
+  </button>
+
+  <div style="padding: 16px 20px; margin-top: auto; border-top: 1px solid var(--border); margin-top: 20px;">
+    <div style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:6px;">Logged in as</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="avatar" style="width:28px;height:28px;font-size:11px;">G</div>
+      <div>
+        <div style="font-size:13px;font-weight:500;">ghost_0x41</div>
+        <div style="font-size:11px;color:var(--accent-red);font-family:var(--font-mono);">Admin</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+
+  <!-- FEED -->
+  <div id="panel-feed" class="panel active">
+    <div id="search-results-panel" style="display:none">
+      <div class="feed-header">
+        <div class="feed-title">Search Results</div>
+        <button class="btn btn-ghost" onclick="clearSearch()" style="font-size:12px;">✕ Clear</button>
+      </div>
+      <div id="search-results-list"></div>
+    </div>
+
+    <div id="feed-main">
+      <div class="feed-header">
+        <div class="feed-title">Community <span>Feed</span></div>
+        <button class="btn btn-primary" onclick="openNewThread()">+ New Thread</button>
+      </div>
+
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setFilter('latest', this)">Latest</button>
+        <button class="filter-tab" onclick="setFilter('hot', this)">🔥 Hot</button>
+        <button class="filter-tab" onclick="setFilter('top', this)">↑ Top</button>
+        <button class="filter-tab" onclick="setFilter('unanswered', this)">? Unanswered</button>
+      </div>
+
+      <div id="threads-list"></div>
+    </div>
+  </div>
+
+  <!-- THREAD DETAIL -->
+  <div id="thread-detail">
+    <button class="back-btn" onclick="closeThread()">← Back to Feed</button>
+    <div id="thread-detail-content"></div>
+  </div>
+
+  <!-- CATEGORIES -->
+  <div id="panel-categories" class="panel">
+    <div class="feed-header">
+      <div class="feed-title">Browse <span>Categories</span></div>
+    </div>
+    <div class="categories-grid">
+      <div class="category-card cat-cyber" onclick="filterByCategory('cybersecurity')">
+        <span class="category-icon">🔐</span>
+        <div class="category-name">Cybersecurity</div>
+        <div class="category-desc">Vulnerabilities, threat intel, defensive security, CVEs, SOC operations</div>
+        <div class="category-stats">
+          <div class="cat-stat"><strong>312</strong>threads</div>
+          <div class="cat-stat"><strong>1.8k</strong>posts</div>
+          <div class="cat-stat"><strong>342</strong>members</div>
+        </div>
+      </div>
+      <div class="category-card cat-prog" onclick="filterByCategory('programming')">
+        <span class="category-icon">⌨</span>
+        <div class="category-name">Programming</div>
+        <div class="category-desc">Code review, algorithms, system design, language discussions, open source</div>
+        <div class="category-stats">
+          <div class="cat-stat"><strong>287</strong>threads</div>
+          <div class="cat-stat"><strong>2.1k</strong>posts</div>
+          <div class="cat-stat"><strong>418</strong>members</div>
+        </div>
+      </div>
+      <div class="category-card cat-net" onclick="filterByCategory('networking')">
+        <span class="category-icon">⬡</span>
+        <div class="category-name">Networking</div>
+        <div class="category-desc">TCP/IP, routing protocols, Cisco/Juniper, SDN, cloud networking</div>
+        <div class="category-stats">
+          <div class="cat-stat"><strong>195</strong>threads</div>
+          <div class="cat-stat"><strong>940</strong>posts</div>
+          <div class="cat-stat"><strong>201</strong>members</div>
+        </div>
+      </div>
+      <div class="category-card cat-hacking" onclick="filterByCategory('ethical-hacking')">
+        <span class="category-icon">🎯</span>
+        <div class="category-name">Ethical Hacking</div>
+        <div class="category-desc">CTF writeups, pentesting, bug bounty, OSCP, red teaming</div>
+        <div class="category-stats">
+          <div class="cat-stat"><strong>143</strong>threads</div>
+          <div class="cat-stat"><strong>876</strong>posts</div>
+          <div class="cat-stat"><strong>167</strong>members</div>
+        </div>
+      </div>
+      <div class="category-card cat-os" onclick="filterByCategory('os')">
+        <span class="category-icon">🐧</span>
+        <div class="category-name">OS / Linux</div>
+        <div class="category-desc">Linux internals, kernel development, hardening, shell scripting, containers</div>
+        <div class="category-stats">
+          <div class="cat-stat"><strong>98</strong>threads</div>
+          <div class="cat-stat"><strong>562</strong>posts</div>
+          <div class="cat-stat"><strong>134</strong>members</div>
+        </div>
+      </div>
+      <div class="category-card cat-tools" onclick="filterByCategory('tools')">
+        <span class="category-icon">⚙</span>
+        <div class="category-name">Tools & Resources</div>
+        <div class="category-desc">Security tools, dev environments, cheatsheets, tutorials, book recs</div>
+        <div class="category-stats">
+          <div class="cat-stat"><strong>74</strong>threads</div>
+          <div class="cat-stat"><strong>341</strong>posts</div>
+          <div class="cat-stat"><strong>289</strong>members</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div id="panel-profile" class="panel">
+    <div class="profile-header">
+      <div class="profile-banner"></div>
+      <div class="profile-content">
+        <div class="profile-avatar-lg">G</div>
+        <div class="profile-info">
+          <div class="profile-name">ghost_0x41</div>
+          <div class="profile-handle">@ghost_0x41 · Member since Jan 2023</div>
+          <div>
+            <span class="role-badge role-admin">⬥ Admin</span>
+            <span class="karma-badge">★ 2,419 karma</span>
+          </div>
+        </div>
+        <button class="btn btn-ghost" style="align-self:flex-start;margin-top:44px;">Edit Profile</button>
+      </div>
+      <div style="padding:0 0 0 4px; margin-top:14px; font-size:13.5px; color:var(--text-secondary); line-height:1.7;">
+        Red teamer, OSCP certified. Currently building detection rules for cloud infrastructure. <span class="text-cyan">Open to collab on CTF challenges.</span>
+      </div>
+      <div class="skills-list">
+        <span class="skill-tag">Python</span><span class="skill-tag">Rust</span><span class="skill-tag">x86 ASM</span>
+        <span class="skill-tag">Wireshark</span><span class="skill-tag">Metasploit</span><span class="skill-tag">Burp Suite</span>
+        <span class="skill-tag">AWS Security</span><span class="skill-tag">Docker</span><span class="skill-tag">PostgreSQL</span>
+      </div>
+      <div class="profile-stats">
+        <div class="profile-stat"><div class="profile-stat-value text-cyan">87</div><div class="profile-stat-label">threads</div></div>
+        <div class="profile-stat"><div class="profile-stat-value text-green">342</div><div class="profile-stat-label">replies</div></div>
+        <div class="profile-stat"><div class="profile-stat-value text-purple">1.2k</div><div class="profile-stat-label">upvotes</div></div>
+        <div class="profile-stat"><div class="profile-stat-value text-amber">★ 2,419</div><div class="profile-stat-label">reputation</div></div>
+        <div class="profile-stat"><div class="profile-stat-value">14</div><div class="profile-stat-label">bookmarks</div></div>
+      </div>
+    </div>
+
+    <div class="admin-section-title" style="margin-top:20px;">Recent Activity</div>
+    <div id="profile-threads"></div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="panel-admin" class="panel">
+    <div class="feed-header">
+      <div class="feed-title">Admin <span>Panel</span></div>
+      <span class="role-badge role-admin">⬥ Admin Access</span>
+    </div>
+
+    <div class="admin-grid">
+      <div class="stat-card">
+        <div class="stat-card-label">Total Users</div>
+        <div class="stat-card-value text-cyan">1,247</div>
+        <div class="stat-card-delta delta-up">↑ +23 this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Threads</div>
+        <div class="stat-card-value text-green">1,109</div>
+        <div class="stat-card-delta delta-up">↑ +48 this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Flagged Content</div>
+        <div class="stat-card-value text-red">7</div>
+        <div class="stat-card-delta delta-up" style="color:var(--accent-red);">↑ needs review</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Daily Active</div>
+        <div class="stat-card-value text-amber">342</div>
+        <div class="stat-card-delta delta-up">↑ +12% vs last week</div>
+      </div>
+    </div>
+
+    <div class="admin-section-title">
+      <span style="color:var(--accent-red);">⚑</span> Flagged for Review
+      <span class="role-badge role-admin" style="font-size:10px;">AI Moderation</span>
+    </div>
+    <div class="admin-table-wrap" style="margin-bottom:24px;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Content</th><th>Author</th><th>Reason</th><th>Confidence</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--text-primary);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"How to bypass WAF completely..."</td>
+            <td>anon_7f3a</td>
+            <td><span class="tag tag-os" style="font-size:10px;">Potentially harmful</span></td>
+            <td><span style="color:var(--accent-amber);">87%</span></td>
+            <td style="display:flex;gap:8px;">
+              <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;">Dismiss</button>
+              <button class="btn btn-danger" style="font-size:11px;padding:4px 10px;" onclick="adminAction('remove')">Remove</button>
+            </td>
+          </tr>
+          <tr>
+            <td style="color:var(--text-primary);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"Selling RDP access to corp servers"</td>
+            <td>darkpool99</td>
+            <td><span class="tag tag-os" style="font-size:10px;">TOS Violation</span></td>
+            <td><span style="color:var(--accent-red);">99%</span></td>
+            <td style="display:flex;gap:8px;">
+              <button class="btn btn-danger" style="font-size:11px;padding:4px 10px;" onclick="adminAction('ban')">Ban User</button>
+              <button class="btn btn-danger" style="font-size:11px;padding:4px 10px;" onclick="adminAction('remove')">Remove</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="admin-section-title">User Management</div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>User</th><th>Role</th><th>Joined</th><th>Posts</th><th>Karma</th><th>Status</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="admin-users-tbody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- BOOKMARKS -->
+  <div id="panel-bookmarks" class="panel">
+    <div class="feed-header">
+      <div class="feed-title">Saved <span>Bookmarks</span></div>
+    </div>
+    <div id="bookmarks-list"></div>
+  </div>
+
+</main>
+
+<!-- SIDEBAR RIGHT -->
+<aside class="sidebar-right">
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Online Now</div>
+    <div id="online-users"></div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:8px;font-family:var(--font-mono);">
+      <span class="online-dot"></span>47 members online
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Trending Today</div>
+    <div id="trending-list"></div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Top Reputation</div>
+    <div id="leaderboard"></div>
+  </div>
+
+  <div class="sidebar-section" style="background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.12);border-radius:var(--radius-lg);padding:16px;">
+    <div style="font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--accent-cyan);margin-bottom:8px;">⚡ System Status</div>
+    <div style="font-size:12px;line-height:2;color:var(--text-secondary);">
+      <div><span class="online-dot" style="background:var(--accent-green)"></span>API Gateway <span style="color:var(--accent-green);margin-left:auto">operational</span></div>
+      <div><span class="online-dot" style="background:var(--accent-green)"></span>PostgreSQL <span style="color:var(--accent-green)">operational</span></div>
+      <div><span class="online-dot" style="background:var(--accent-green)"></span>WebSocket Server <span style="color:var(--accent-green)">operational</span></div>
+      <div><span class="online-dot" style="background:var(--accent-amber)"></span>Email Service <span style="color:var(--accent-amber)">degraded</span></div>
+    </div>
+  </div>
+</aside>
+
+</div><!-- end app-layout -->
+</div><!-- end app -->
+
+<!-- NEW THREAD MODAL -->
+<div class="modal-overlay" id="new-thread-modal">
+  <div class="modal">
+    <div class="modal-title">
+      Create New Thread
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Thread Title</label>
+      <input type="text" class="form-input" id="new-thread-title" placeholder="Be specific and descriptive..." />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select class="form-select" id="new-thread-category">
+        <option value="cybersecurity">🔐 Cybersecurity</option>
+        <option value="programming">⌨ Programming</option>
+        <option value="networking">⬡ Networking</option>
+        <option value="ethical-hacking">🎯 Ethical Hacking</option>
+        <option value="os">🐧 OS / Linux</option>
+        <option value="tools">⚙ Tools & Resources</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Tags (comma-separated)</label>
+      <input type="text" class="form-input" id="new-thread-tags" placeholder="e.g. python, ctf, oscp, buffer-overflow" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Content (Markdown Supported)</label>
+      <div class="markdown-toolbar">
+        <button class="md-btn" onclick="insertMd('**','**')">B</button>
+        <button class="md-btn" onclick="insertMd('_','_')"><em>I</em></button>
+        <button class="md-btn" onclick="insertMd('`','`')">Code</button>
+        <button class="md-btn" onclick="insertMd('\n```\n','\n```')">Block</button>
+        <button class="md-btn" onclick="insertMd('## ','')">H2</button>
+        <button class="md-btn" onclick="insertMd('> ','')">Quote</button>
+        <button class="md-btn" onclick="insertMd('[','](url)')">Link</button>
+      </div>
+      <textarea class="form-textarea with-toolbar" id="new-thread-body" placeholder="Write your post in Markdown...&#10;&#10;Supports **bold**, _italic_, `code`, and code blocks..."></textarea>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+      <div style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">⚡ AI moderation will review content</div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitThread()">Post Thread</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LIVE NOTIFICATION -->
+<div class="live-notif" id="live-notif">
+  <div class="live-notif-title"><span class="live-dot"></span><span id="live-notif-title"></span></div>
+  <div class="live-notif-body" id="live-notif-body"></div>
+</div>
+
+<script>
+// ===== DATA =====
+const THREADS = [
+  {
+    id: 1, title: "CVE-2024-3094: XZ Utils backdoor — complete technical analysis and indicators of compromise",
+    preview: "The XZ Utils backdoor (CVE-2024-3094) is one of the most sophisticated supply-chain attacks ever discovered. This post breaks down the obfuscation techniques, the IFUNC resolver abuse, and detection strategies for affected systems.",
+    author: "vx_researcher", authorInitials: "VX", authorColor: "linear-gradient(135deg,#ef4444,#a855f7)",
+    time: "2h ago", category: "cybersecurity", tags: ["cve","supply-chain","linux","forensics"],
+    votes: 342, comments: 67, views: 4821, hot: true, pinned: false, bookmarked: false,
+    body: `## Overview\n\nThe XZ Utils backdoor was planted over two years of social engineering by a threat actor known as "Jia Tan." The attack targeted **systemd-linked SSH daemons** on specific Linux distributions.\n\n## Technical Breakdown\n\nThe backdoor used a multi-stage infection chain:\n\n\`\`\`bash\n# Detection command — check if your system is affected\nobjdump -t /usr/lib/x86_64-linux-gnu/liblzma.so.5 | grep -i crc\n# Infected versions will show unexpected symbols\n\`\`\`\n\nKey stages:\n1. Malicious test files in the tarball — containing the actual payload\n2. A build-time script extracts and compiles the hidden code\n3. The payload hooks RSA key operations in OpenSSH via \`IFUNC\` resolvers\n4. Allows unauthenticated RCE via a specially crafted public key\n\n## Indicators of Compromise\n\n- XZ Utils 5.6.0 or 5.6.1 installed\n- \`liblzma\` version mismatch between package manager and runtime\n- Unexpected symbols in \`liblzma.so\` object dump\n\n## Mitigation\n\nDowngrade to \`xz-utils 5.4.x\` immediately on any Debian Sid, Kali, or openSUSE Tumbleweed systems.`,
+    replies: [
+      { id: 101, author: "kernel_witch", initials: "KW", color: "linear-gradient(135deg,#a855f7,#3b82f6)", time: "1h ago", body: "Excellent writeup. Worth noting that the \`n_cpus\` check also served as an anti-VM mechanism — the backdoor only activated on hosts with ≥2 CPUs, making sandbox analysis harder.", votes: 89, replies: [
+        { id: 1011, author: "vx_researcher", initials: "VX", color: "linear-gradient(135deg,#ef4444,#a855f7)", time: "55m ago", body: "Great catch! I missed that in the initial draft. Updating now.", votes: 23 }
+      ]},
+      { id: 102, author: "ghost_0x41", initials: "G", color: "linear-gradient(135deg,#00d4ff,#a855f7)", time: "45m ago", body: "For those doing incident response: Qualys and Wazuh already have detection rules published. The \`lzma_crc64\` symbol check is the fastest triage method on live systems.", votes: 54 }
+    ]
+  },
+  {
+    id: 2, title: "Implementing zero-trust network architecture from scratch — a production war story",
+    preview: "After 18 months of migrating our flat enterprise network to a zero-trust model using a combination of Cloudflare WARP, HashiCorp Vault, and OPA, here's what actually worked and what nearly destroyed us.",
+    author: "netarch_k8s", authorInitials: "NK", authorColor: "linear-gradient(135deg,#a855f7,#6366f1)",
+    time: "5h ago", category: "networking", tags: ["zero-trust","cloudflare","vault","enterprise"],
+    votes: 218, comments: 41, views: 2934, hot: false, pinned: true, bookmarked: true,
+    body: "## The Problem\n\nOur legacy network had 12 years of accumulated trust. VPN-centric, flat VLAN structure, implicit trust between internal hosts...",
+    replies: []
+  },
+  {
+    id: 3, title: "Solving HackTheBox — Forest (Active Directory Kerberoasting + DCSync walkthrough)",
+    preview: "Complete walkthrough of the Forest machine. Covers AS-REP roasting, Kerberoasting, BloodHound enumeration, and a DCSync attack to dump domain credentials. Includes custom Python tooling.",
+    author: "pwn3r_b3ar", authorInitials: "PB", authorColor: "linear-gradient(135deg,#f59e0b,#ef4444)",
+    time: "8h ago", category: "ethical-hacking", tags: ["htb","active-directory","kerberos","ctf"],
+    votes: 187, comments: 33, views: 3102, hot: true, pinned: false, bookmarked: false,
+    body: "## Enumeration\n\nStarting with a standard `nmap` scan...",
+    replies: []
+  },
+  {
+    id: 4, title: "Rust vs C++ for systems programming in 2025 — a year of production experience",
+    preview: "Rewrote a high-performance packet processor from C++ to Rust. Performance metrics, memory safety wins, the borrow checker fights, and whether it was worth it. TL;DR: yes, but it's not easy.",
+    author: "sys_programmer", authorInitials: "SP", authorColor: "linear-gradient(135deg,#00ff88,#00d4ff)",
+    time: "12h ago", category: "programming", tags: ["rust","cpp","systems","performance"],
+    votes: 156, comments: 78, views: 5671, hot: false, pinned: false, bookmarked: true,
+    body: "## The Migration\n\nOur original C++ codebase processed ~2M packets/second with periodic segfaults in the parser...",
+    replies: []
+  },
+  {
+    id: 5, title: "Writing a custom Linux kernel module for eBPF-based process monitoring",
+    preview: "Step-by-step guide to writing an eBPF program that monitors process creation, network connections, and file I/O without kernel patches. Includes performance benchmarks against auditd.",
+    author: "kernel_witch", authorInitials: "KW", authorColor: "linear-gradient(135deg,#a855f7,#3b82f6)",
+    time: "1d ago", category: "os", tags: ["ebpf","linux","kernel","security"],
+    votes: 203, comments: 44, views: 2788, hot: false, pinned: false, bookmarked: false,
+    body: "## eBPF Architecture\n\neBPF allows you to run sandboxed programs in kernel space without modifying kernel source code...",
+    replies: []
+  },
+  {
+    id: 6, title: "Building a personal threat intelligence platform with MISP + Elastic Stack",
+    preview: "Self-hosted threat intel aggregation: pulling from VirusTotal, Shodan, AlienVault OTX, and custom YARA rules. All queried through a unified Kibana dashboard. Docker Compose setup included.",
+    author: "threat_intel_ops", authorInitials: "TI", authorColor: "linear-gradient(135deg,#3b82f6,#00d4ff)",
+    time: "2d ago", category: "tools", tags: ["misp","elastic","yara","threat-intel"],
+    votes: 142, comments: 29, views: 1943, hot: false, pinned: false, bookmarked: false,
+    body: "## Architecture Overview\n\nThe platform consists of three main components...",
+    replies: []
+  }
+];
+
+const USERS = [
+  { name: "ghost_0x41", role: "admin", joined: "Jan 2023", posts: 429, karma: 2419, status: "online" },
+  { name: "vx_researcher", role: "mod", joined: "Mar 2022", posts: 312, karma: 1847, status: "online" },
+  { name: "kernel_witch", role: "user", joined: "Jul 2023", posts: 198, karma: 934, status: "online" },
+  { name: "netarch_k8s", role: "user", joined: "Sep 2022", posts: 156, karma: 721, status: "away" },
+  { name: "pwn3r_b3ar", role: "user", joined: "Nov 2023", posts: 89, karma: 445, status: "online" },
+  { name: "sys_programmer", role: "user", joined: "Feb 2024", posts: 67, karma: 312, status: "offline" },
+];
+
+const ONLINE_USERS = [
+  { name: "vx_researcher", role: "Moderator", initials: "VX", color: "linear-gradient(135deg,#ef4444,#a855f7)" },
+  { name: "kernel_witch", role: "Power User", initials: "KW", color: "linear-gradient(135deg,#a855f7,#3b82f6)" },
+  { name: "pwn3r_b3ar", role: "Member", initials: "PB", color: "linear-gradient(135deg,#f59e0b,#ef4444)" },
+  { name: "netarch_k8s", role: "Member", initials: "NK", color: "linear-gradient(135deg,#a855f7,#6366f1)" },
+  { name: "tr3y_n3t", role: "New Member", initials: "TN", color: "linear-gradient(135deg,#00ff88,#00d4ff)" },
+];
+
+const TRENDING = [
+  { title: "CVE-2024-3094: XZ backdoor", stats: "342 upvotes · 67 comments", tid: 1 },
+  { title: "Zero-trust migration war story", stats: "218 upvotes · 41 comments", tid: 2 },
+  { title: "Linux eBPF process monitoring", stats: "203 upvotes · 44 comments", tid: 5 },
+  { title: "Rust vs C++ in production 2025", stats: "156 upvotes · 78 comments", tid: 4 },
+];
+
+const CAT_COLORS = {
+  "cybersecurity": "tag-cyber",
+  "programming": "tag-prog",
+  "networking": "tag-net",
+  "ethical-hacking": "tag-hacking",
+  "os": "tag-os",
+  "tools": "tag-prog"
+};
+
+// ===== STATE =====
+let currentFilter = 'latest';
+let currentCategory = null;
+let currentPanel = 'feed';
+let userVotes = {};
+let localThreads = [...THREADS];
+let bookmarks = new Set([2, 4]);
+
+// ===== AUTH =====
+function loginWith(provider) {
+  showNotif(`OAuth redirect`, `Authenticating via ${provider.charAt(0).toUpperCase()+provider.slice(1)}...`);
+  setTimeout(doLogin, 800);
+}
+
+function doLogin() {
+  document.getElementById('auth-screen').classList.remove('open');
+  document.getElementById('app').style.display = 'block';
+  renderAll();
+  setTimeout(() => showNotif('Welcome back, ghost_0x41', 'New activity in Cybersecurity · 3 replies to your posts'), 1200);
+  startLiveActivity();
+}
+
+// ===== RENDER =====
+function renderAll() {
+  renderThreads();
+  renderOnlineUsers();
+  renderTrending();
+  renderLeaderboard();
+  renderAdminUsers();
+  renderProfileThreads();
+  renderBookmarks();
+}
+
+function tagHtml(t, catClass) {
+  return `<span class="tag ${catClass}">${t}</span>`;
+}
+
+function renderThreads(filter) {
+  const list = document.getElementById('threads-list');
+  let threads = [...localThreads];
+
+  if (currentCategory) threads = threads.filter(t => t.category === currentCategory);
+
+  const activeFilter = filter || currentFilter;
+  if (activeFilter === 'hot') threads = threads.filter(t => t.hot).concat(threads.filter(t => !t.hot));
+  if (activeFilter === 'top') threads.sort((a,b) => b.votes - a.votes);
+  if (activeFilter === 'unanswered') threads = threads.filter(t => t.comments === 0).concat(threads.filter(t => t.comments > 0));
+  if (activeFilter === 'latest') threads.sort((a,b) => a.time.localeCompare(b.time));
+
+  list.innerHTML = threads.map(t => {
+    const catClass = CAT_COLORS[t.category] || 'tag-prog';
+    const voted = userVotes[t.id];
+    const bk = bookmarks.has(t.id);
+    return `
+    <div class="thread-card ${t.hot?'hot':''} ${t.pinned?'pinned':''}" onclick="openThread(${t.id})">
+      <div class="thread-meta">
+        <div class="thread-author-avatar" style="background:${t.authorColor}">${t.authorInitials}</div>
+        <span class="thread-author"><span>${t.author}</span></span>
+        ${t.pinned ? '<span class="pinned-badge">📌 Pinned</span>' : ''}
+        ${t.hot ? '<span class="hot-badge">🔥 Hot</span>' : ''}
+        <span class="thread-time">${t.time}</span>
+      </div>
+      <div class="thread-title">${t.title}</div>
+      <div class="thread-preview">${t.preview}</div>
+      <div class="thread-footer">
+        <button class="vote-btn ${voted==='up'?'voted':''}" onclick="vote(event,${t.id},'up')">▲ ${t.votes+(voted==='up'?1:0)}</button>
+        <button class="vote-btn downvote" onclick="vote(event,${t.id},'down')">▼</button>
+        ${tagHtml(t.category.replace('-',' '), catClass)}
+        ${t.tags.slice(0,2).map(tag => `<span class="tag tag-prog" style="opacity:.65;">#${tag}</span>`).join('')}
+        <span class="thread-stat" style="margin-left:4px;">💬 ${t.comments}</span>
+        <span class="thread-stat">👁 ${t.views.toLocaleString()}</span>
+        <button class="vote-btn ${bk?'voted':''}" onclick="toggleBookmark(event,${t.id})" style="margin-left:auto;${bk?'border-color:var(--accent-amber);color:var(--accent-amber);background:rgba(245,158,11,0.1);':''}">
+          ${bk ? '★' : '☆'} ${bk ? 'Saved' : 'Save'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderOnlineUsers() {
+  document.getElementById('online-users').innerHTML = ONLINE_USERS.map(u => `
+    <div class="online-user">
+      <div class="avatar" style="width:30px;height:30px;font-size:11px;background:${u.color};">${u.initials}</div>
+      <div class="online-user-info">
+        <div class="online-user-name">${u.name}</div>
+        <div class="online-user-role">${u.role}</div>
+      </div>
+      <span class="online-dot"></span>
+    </div>`).join('');
+}
+
+function renderTrending() {
+  document.getElementById('trending-list').innerHTML = TRENDING.map((t,i) => `
+    <div class="trending-item" onclick="openThread(${t.tid})">
+      <div class="trending-rank">#${i+1}</div>
+      <div class="trending-title">${t.title}</div>
+      <div class="trending-stats">${t.stats}</div>
+    </div>`).join('');
+}
+
+function renderLeaderboard() {
+  const top = [...USERS].sort((a,b) => b.karma - a.karma).slice(0,5);
+  document.getElementById('leaderboard').innerHTML = top.map((u,i) => `
+    <div class="online-user" style="padding:6px 0;">
+      <div style="font-family:var(--font-mono);font-size:13px;color:var(--text-muted);width:20px;">#${i+1}</div>
+      <div class="avatar" style="width:28px;height:28px;font-size:10px;">${u.name[0].toUpperCase()}</div>
+      <div class="online-user-info">
+        <div class="online-user-name" style="font-size:12px;">${u.name}</div>
+      </div>
+      <span class="karma-badge" style="font-size:10px;">★ ${u.karma.toLocaleString()}</span>
+    </div>`).join('');
+}
+
+function renderAdminUsers() {
+  document.getElementById('admin-users-tbody').innerHTML = USERS.map(u => {
+    const roleClass = u.role === 'admin' ? 'role-admin' : u.role === 'mod' ? 'role-mod' : 'role-user';
+    const statusColor = u.status === 'online' ? 'var(--accent-green)' : u.status === 'away' ? 'var(--accent-amber)' : 'var(--text-muted)';
+    return `<tr>
+      <td style="color:var(--text-primary);font-weight:500;">${u.name}</td>
+      <td><span class="role-badge ${roleClass}" style="font-size:10px;">${u.role}</span></td>
+      <td>${u.joined}</td>
+      <td class="mono">${u.posts}</td>
+      <td><span class="karma-badge" style="font-size:10px;">★ ${u.karma.toLocaleString()}</span></td>
+      <td><span style="color:${statusColor};font-size:12px;font-family:var(--font-mono);">● ${u.status}</span></td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;" onclick="showNotif('Action','Promoting user to moderator...')">Promote</button>
+          <button class="btn btn-danger" style="font-size:11px;padding:3px 8px;" onclick="showNotif('Action','User has been warned.')">Warn</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderProfileThreads() {
+  const myThreads = localThreads.filter(t => t.author === 'ghost_0x41').concat(localThreads.slice(0,2));
+  document.getElementById('profile-threads').innerHTML = myThreads.slice(0,4).map(t => {
+    const catClass = CAT_COLORS[t.category] || 'tag-prog';
+    return `<div class="thread-card" onclick="openThread(${t.id})">
+      <div class="thread-title" style="font-size:14px;">${t.title}</div>
+      <div style="display:flex;gap:10px;margin-top:8px;align-items:center;">
+        ${tagHtml(t.category, catClass)}
+        <span class="thread-stat">▲ ${t.votes}</span>
+        <span class="thread-stat">💬 ${t.comments}</span>
+        <span class="thread-time">${t.time}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderBookmarks() {
+  const bkThreads = localThreads.filter(t => bookmarks.has(t.id));
+  document.getElementById('bookmarks-list').innerHTML = bkThreads.length === 0
+    ? '<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:40px;">No bookmarks yet. Save threads with the ★ button.</div>'
+    : bkThreads.map(t => {
+      const catClass = CAT_COLORS[t.category] || 'tag-prog';
+      return `<div class="thread-card" onclick="openThread(${t.id})">
+        <div class="thread-title" style="font-size:14px;">${t.title}</div>
+        <div style="display:flex;gap:10px;margin-top:8px;align-items:center;">
+          ${tagHtml(t.category, catClass)}
+          <span class="thread-stat">▲ ${t.votes}</span>
+          <span class="thread-stat">💬 ${t.comments}</span>
+          <span class="thread-time">${t.time}</span>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+// ===== NAVIGATION =====
+function navigate(panel) {
+  // Hide all panels
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  // Close thread detail
+  document.getElementById('thread-detail').style.display = 'none';
+  document.getElementById('panel-feed').style.display = '';
+
+  // Activate target
+  const target = document.getElementById('panel-' + panel);
+  if (target) {
+    target.classList.add('active');
+    if (panel !== 'feed') document.getElementById('panel-feed').classList.remove('active');
+  }
+
+  // Update nav active states
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + panel);
+  if (navEl) navEl.classList.add('active');
+
+  currentPanel = panel;
+  currentCategory = null;
+
+  if (panel === 'feed') renderThreads();
+}
+
+function filterByCategory(cat) {
+  currentCategory = cat;
+  navigate('feed');
+  document.getElementById('feed-main').style.display = '';
+  document.getElementById('search-results-panel').style.display = 'none';
+  renderThreads();
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderThreads();
+}
+
+// ===== THREAD DETAIL =====
+function openThread(id) {
+  const t = localThreads.find(x => x.id === id);
+  if (!t) return;
+
+  const feedPanel = document.getElementById('panel-feed');
+  feedPanel.classList.remove('active');
+
+  const detail = document.getElementById('thread-detail');
+  detail.style.display = 'block';
+  t.views++;
+
+  const catClass = CAT_COLORS[t.category] || 'tag-prog';
+
+  const repliesHtml = (t.replies || []).map(r => `
+    <div class="comment-card">
+      <div class="comment-header">
+        <div class="avatar" style="width:32px;height:32px;font-size:12px;background:${r.color};">${r.initials}</div>
+        <div>
+          <span style="font-size:13px;font-weight:600;">${r.author}</span>
+          <span class="thread-time" style="margin-left:8px;">${r.time}</span>
+        </div>
+        <span style="margin-left:auto;" class="karma-badge" style="font-size:10px;">★ ${Math.floor(Math.random()*1200+200)}</span>
+      </div>
+      <div class="comment-body">${r.body.replace(/`([^`]+)`/g, '<code>$1</code>')}</div>
+      <div class="comment-footer">
+        <button class="comment-action" onclick="this.textContent='▲ '+(parseInt(this.textContent.replace(/\D/g,''))+(this.dataset.v?-1:1));this.dataset.v=!this.dataset.v">▲ ${r.votes}</button>
+        <button class="comment-action" onclick="showReplyBox('${r.id}')">↩ Reply</button>
+        <button class="comment-action">⚑ Flag</button>
+      </div>
+      ${(r.replies||[]).map(nested => `
+        <div class="comment-card nested" style="margin-top:10px;">
+          <div class="comment-header">
+            <div class="avatar" style="width:26px;height:26px;font-size:10px;background:${nested.color};">${nested.initials}</div>
+            <span style="font-size:13px;font-weight:600;">${nested.author}</span>
+            <span class="thread-time" style="margin-left:8px;">${nested.time}</span>
+          </div>
+          <div class="comment-body">${nested.body}</div>
+          <div class="comment-footer">
+            <button class="comment-action">▲ ${nested.votes}</button>
+            <button class="comment-action" onclick="showReplyBox('${nested.id}')">↩ Reply</button>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+
+  const bodyHtml = (t.body||'')
+    .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/^## (.+)$/gm, '<h3 style="font-family:var(--font-display);font-size:17px;margin:18px 0 8px;color:var(--text-primary);">$1</h3>')
+    .replace(/\n/g, '<br>');
+
+  detail.querySelector('#thread-detail-content').innerHTML = `
+    <div class="thread-full">
+      <div class="thread-meta" style="margin-bottom:14px;">
+        <div class="thread-author-avatar" style="background:${t.authorColor};width:36px;height:36px;">${t.authorInitials}</div>
+        <div>
+          <div style="font-size:13.5px;font-weight:600;">${t.author}</div>
+          <div style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">${t.time} · ${t.views.toLocaleString()} views</div>
+        </div>
+        ${t.pinned ? '<span class="pinned-badge">📌 Pinned</span>' : ''}
+        ${t.hot ? '<span class="hot-badge">🔥 Hot</span>' : ''}
+      </div>
+      <div class="thread-full-title">${t.title}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
+        ${tagHtml(t.category.replace('-',' '), catClass)}
+        ${t.tags.map(tag => `<span class="tag tag-prog" style="opacity:.7;">#${tag}</span>`).join('')}
+      </div>
+      <div class="thread-body">${bodyHtml}</div>
+      <div class="thread-actions">
+        <button class="vote-btn ${userVotes[t.id]==='up'?'voted':''}" onclick="vote(event,${t.id},'up');this.innerHTML='▲ '+(${t.votes}+(userVotes[${t.id}]==='up'?1:0))">▲ ${t.votes} Upvote</button>
+        <button class="vote-btn downvote">▼ Downvote</button>
+        <button class="btn btn-ghost" style="font-size:12px;" onclick="toggleBookmark(event,${t.id})">☆ Bookmark</button>
+        <button class="btn btn-ghost" style="font-size:12px;" onclick="showNotif('Share','Link copied to clipboard!')">⎘ Share</button>
+        <span style="margin-left:auto;color:var(--text-muted);font-size:12px;font-family:var(--font-mono);">💬 ${t.comments} replies</span>
+      </div>
+    </div>
+
+    <div class="reply-box">
+      <div class="reply-box-title">Write a Reply</div>
+      <textarea class="reply-textarea" id="reply-input-${t.id}" placeholder="Share your thoughts, insights, or questions... Markdown supported."></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">Markdown · Rate limited · AI moderation enabled</span>
+        <button class="btn btn-primary" onclick="submitReply(${t.id})">Post Reply</button>
+      </div>
+    </div>
+
+    <div class="admin-section-title" style="margin-bottom:14px;">
+      ${t.replies ? t.replies.length : 0} Replies
+    </div>
+    ${repliesHtml || '<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:24px;">No replies yet. Be the first to respond!</div>'}
+  `;
+}
+
+function closeThread() {
+  document.getElementById('thread-detail').style.display = 'none';
+  document.getElementById('panel-feed').classList.add('active');
+}
+
+// ===== INTERACTIONS =====
+function vote(e, id, dir) {
+  e.stopPropagation();
+  userVotes[id] = userVotes[id] === dir ? null : dir;
+  renderThreads();
+}
+
+function toggleBookmark(e, id) {
+  e.stopPropagation();
+  if (bookmarks.has(id)) {
+    bookmarks.delete(id);
+    showNotif('Bookmark removed', 'Thread removed from your saved list.');
+  } else {
+    bookmarks.add(id);
+    showNotif('Bookmarked!', 'Thread saved to your bookmarks.');
+  }
+  renderThreads();
+  renderBookmarks();
+}
+
+// ===== SEARCH =====
+function handleSearch(query) {
+  const panel = document.getElementById('search-results-panel');
+  const feedMain = document.getElementById('feed-main');
+
+  if (!query.trim()) {
+    panel.style.display = 'none';
+    feedMain.style.display = '';
+    return;
+  }
+
+  navigate('feed');
+  panel.style.display = '';
+  feedMain.style.display = 'none';
+
+  const q = query.toLowerCase();
+  const results = localThreads.filter(t =>
+    t.title.toLowerCase().includes(q) ||
+    t.preview.toLowerCase().includes(q) ||
+    t.tags.some(tag => tag.includes(q)) ||
+    t.category.includes(q)
+  );
+
+  document.getElementById('search-results-list').innerHTML = results.length === 0
+    ? `<div style="color:var(--text-muted);font-size:13px;padding:24px;text-align:center;">No results for "${query}"</div>`
+    : `<div class="search-results">${results.map(t => {
+        const hi = t.title.replace(new RegExp(query,'gi'), m => `<span class="search-highlight">${m}</span>`);
+        return `<div class="search-result-item" onclick="openThread(${t.id})">
+          <div class="search-result-title">${hi}</div>
+          <div class="search-result-preview">${t.preview.substring(0,100)}...</div>
+        </div>`;
+      }).join('')}</div>`;
+}
+
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  handleSearch('');
+}
+
+// ===== NEW THREAD MODAL =====
+function openNewThread() {
+  document.getElementById('new-thread-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('new-thread-modal').classList.remove('open');
+}
+
+function insertMd(before, after) {
+  const ta = document.getElementById('new-thread-body');
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const selected = ta.value.substring(start, end) || 'text';
+  ta.value = ta.value.substring(0,start) + before + selected + after + ta.value.substring(end);
+  ta.focus();
+}
+
+function submitThread() {
+  const title = document.getElementById('new-thread-title').value.trim();
+  const body = document.getElementById('new-thread-body').value.trim();
+  const cat = document.getElementById('new-thread-category').value;
+  const tagsRaw = document.getElementById('new-thread-tags').value;
+  const tags = tagsRaw.split(',').map(t=>t.trim()).filter(Boolean);
+
+  if (!title || !body) { showNotif('Validation Error', 'Title and content are required.'); return; }
+
+  const newT = {
+    id: Date.now(), title, preview: body.substring(0,180) + '...',
+    author: 'ghost_0x41', authorInitials: 'G', authorColor: 'linear-gradient(135deg,#00d4ff,#a855f7)',
+    time: 'just now', category: cat, tags: tags.length ? tags : ['new'],
+    votes: 0, comments: 0, views: 1, hot: false, pinned: false, bookmarked: false,
+    body, replies: []
+  };
+
+  localThreads.unshift(newT);
+  closeModal();
+  navigate('feed');
+  renderThreads();
+  showNotif('Thread Posted!', `"${title.substring(0,40)}..." is now live.`);
+
+  document.getElementById('new-thread-title').value = '';
+  document.getElementById('new-thread-body').value = '';
+  document.getElementById('new-thread-tags').value = '';
+}
+
+// ===== REPLY =====
+function submitReply(threadId) {
+  const input = document.getElementById('reply-input-' + threadId);
+  const body = input ? input.value.trim() : '';
+  if (!body) { showNotif('Empty Reply', 'Please write something before posting.'); return; }
+
+  const t = localThreads.find(x => x.id === threadId);
+  if (t) {
+    t.replies = t.replies || [];
+    t.replies.unshift({
+      id: Date.now(), author: 'ghost_0x41', initials: 'G',
+      color: 'linear-gradient(135deg,#00d4ff,#a855f7)',
+      time: 'just now', body, votes: 0, replies: []
+    });
+    t.comments++;
+  }
+
+  showNotif('Reply Posted!', 'Your reply has been added to the thread.');
+  openThread(threadId);
+}
+
+function showReplyBox(parentId) {
+  showNotif('Reply', 'Nested reply functionality — replying to comment #' + parentId);
+}
+
+// ===== ADMIN ACTIONS =====
+function adminAction(action) {
+  if (action === 'ban') showNotif('User Banned', 'User has been permanently banned and content removed.');
+  if (action === 'remove') showNotif('Content Removed', 'Thread has been removed and flagged in audit log.');
+}
+
+// ===== NOTIFICATIONS =====
+let notifQueue = [];
+let notifTimeout;
+
+function showNotif(title, body) {
+  const el = document.getElementById('live-notif');
+  document.getElementById('live-notif-title').textContent = title;
+  document.getElementById('live-notif-body').textContent = body;
+  el.classList.add('show');
+  clearTimeout(notifTimeout);
+  notifTimeout = setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function toggleNotifications() {
+  showNotif('Notifications (3)', 'vx_researcher replied · kernel_witch upvoted · New CTF challenge posted');
+  const badge = document.getElementById('notif-count');
+  badge.style.display = 'none';
+}
+
+// ===== LIVE ACTIVITY SIMULATION (WebSocket simulation) =====
+const liveEvents = [
+  { title: 'New reply in CVE-2024-3094', body: 'kernel_witch replied with a new IOC...' },
+  { title: 'New thread in Ethical Hacking', body: 'pwn3r_b3ar: "HackTheBox — Cascade walkthrough"' },
+  { title: 'vx_researcher upvoted your post', body: '+10 reputation · Your analysis on XZ backdoor' },
+  { title: 'New member joined', body: 'sec_apprentice created an account via GitHub' },
+  { title: 'Thread reaching Hot 🔥', body: '"Rust vs C++ in production" trending fast' },
+];
+
+let liveIdx = 0;
+function startLiveActivity() {
+  setTimeout(function tick() {
+    if (liveIdx < liveEvents.length) {
+      const ev = liveEvents[liveIdx++];
+      showNotif(ev.title, ev.body);
+    }
+    setTimeout(tick, 12000 + Math.random() * 8000);
+  }, 5000);
+}
+</script>
+</body>
+</html>
